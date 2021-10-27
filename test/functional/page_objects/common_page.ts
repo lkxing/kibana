@@ -516,7 +516,7 @@ export class CommonPageObject extends FtrService {
       );
   }
 
-  async setTime(time: { from: string; to: string }) {
+  async setTime(time: TimeStrings) {
     await this.kibanaServer.uiSettings.replace({
       'timepicker:timeDefaults': JSON.stringify(this.formatTime(time)),
     });
