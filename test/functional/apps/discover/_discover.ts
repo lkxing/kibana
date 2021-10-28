@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
-  describe('discover test', async function describeIndexTests() {
-    const { defaultStartTime, defaultEndTime } = PageObjects.timePicker;
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -32,8 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
         'timepicker:timeDefaults': JSON.stringify(
           PageObjects.common.formatTime({
-            from: defaultStartTime,
-            to: defaultEndTime,
+            from: PageObjects.timePicker.defaultStartTime,
+            to: PageObjects.timePicker.defaultEndTime,
           })
         ),
       });
@@ -48,8 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be(defaultStartTime);
-        expect(time.end).to.be(defaultEndTime);
+        expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
+        expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
         expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
@@ -88,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${defaultStartTime} - ${defaultEndTime}`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
