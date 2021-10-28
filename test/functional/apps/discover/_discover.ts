@@ -20,33 +20,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
-
+  const { defaultStartTime, defaultEndTime } = PageObjects.timePicker;
   const defaultSettings = {
     defaultIndex: 'logstash-*',
+    'timepicker:timeDefaults': JSON.stringify(PageObjects.common.formatTime({
+      from: defaultStartTime,
+      to: defaultEndTime,
+    })),
   };
 
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search'] });
+      await PageObjects.common.unsetTime();
     });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
       it('should show correct time range string by timepicker', async function () {
         const time = await PageObjects.timePicker.getTimeConfig();
-        expect(time.start).to.be(PageObjects.timePicker.defaultStartTime);
-        expect(time.end).to.be(PageObjects.timePicker.defaultEndTime);
+        expect(time.start).to.be(defaultStartTime);
+        expect(time.end).to.be(defaultEndTime);
         const rowData = await PageObjects.discover.getDocTableIndex(1);
         log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
         expect(rowData).to.contain('Sep 22, 2015 @ 23:50:13.253');
@@ -85,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
+        const expectedTimeString = `${defaultStartTime} - ${defaultEndTime}`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
