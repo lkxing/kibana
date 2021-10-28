@@ -21,13 +21,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
   const { defaultStartTime, defaultEndTime } = PageObjects.timePicker;
-  const defaultSettings = {
-    defaultIndex: 'logstash-*',
-    'timepicker:timeDefaults': JSON.stringify(PageObjects.common.formatTime({
-      from: defaultStartTime,
-      to: defaultEndTime,
-    })),
-  };
 
   describe('discover test', function describeIndexTests() {
     before(async function () {
@@ -35,7 +28,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.uiSettings.replace(defaultSettings);
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+        'timepicker:timeDefaults': JSON.stringify(
+          PageObjects.common.formatTime({
+            from: defaultStartTime,
+            to: defaultEndTime,
+          })
+        ),
+      });
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
