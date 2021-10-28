@@ -20,9 +20,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const inspector = getService('inspector');
   const elasticChart = getService('elasticChart');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
-  const { defaultStartTime, defaultEndTime } = PageObjects.timePicker;
 
-  describe('discover test', function describeIndexTests() {
+  describe('discover test', async function describeIndexTests() {
+    const { defaultStartTime, defaultEndTime } = PageObjects.timePicker;
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
