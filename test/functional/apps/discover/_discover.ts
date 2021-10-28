@@ -37,7 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search'] });
+    });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
